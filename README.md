@@ -30,7 +30,7 @@
     - 2 комментария в день;
     - 1 просмотр списка популярных локаций в день;
     - 2 поисковых запросов по локации в день.
-- Сезонность: летом/зимой количество трафика может увеличиваться в 5-10 раз;
+- Сезонность: летом/зимой количество трафика может увеличиваться в 4 раза;
 - Данные: храним всегда;
 - Лимиты:
     - Постов на пользователя: 10 000;
@@ -60,8 +60,7 @@ RPS (write post):
 post per day
 4 / 30 = ~0.133
 
-RPS (without seasonality) = 10 000 000 * 0.133 / 86 400 = ~15.5
-RPS (with seasonality)    = ~15 * 10 = ~155
+RPS = 10 000 000 * 0.133 / 86 400 = ~15.5
 ```
 
 RPS (read posts):
@@ -69,8 +68,7 @@ RPS (read posts):
 ```
 one batch = 10 posts
 
-RPS (without seasonality) = 10 000 000 * 10 / 86 400 = ~1157.5
-RPS (with seasonality)    = ~1157 * 10 = ~11575
+RPS = 10 000 000 * 10 / 86 400 = ~1157.5
 ```
 
 Post model:
@@ -100,6 +98,40 @@ longitude   8B
 total       280B
 ```
 
+One post size (without media files):
+
+```
+3032B + 280B = 3312B
+```
+
+Traffic (write post):
+
+```
+traffic = ~15.5RPS * 3312B = 51 336B = ~51.3KBps
+```
+
+Traffic (read post):
+
+```
+traffic = ~1157.5RPS * 3312B = 3 833 640B = ~3,8MBps
+```
+
+#### Media
+
+RPS (write media)
+
+```
+RPS = 10 000 000 * 5 / 86 400 = ~578.7
+```
+
+RPS (read media):
+
+```
+one batch = 10 posts
+
+RPS = 10 000 000 * 5 * 10 / 86 400 = ~5787
+```
+
 Attachment model:
 
 ```
@@ -112,24 +144,16 @@ url         256B
 total       272B
 ```
 
-One post size:
+Traffic (write media):
 
 ```
-3032B + (272B * 5) + 280B = 4672B
+traffic = ~578.7RPS * 272B = 157 406B = ~157.4KBps
 ```
 
-Traffic (write post):
+Traffic (read media):
 
 ```
-traffic (without seasonality) = ~15.5RPS * 4672B = 72 416B = ~72.5KBps
-traffic (with seasonality)    = ~72.5KBps * 10 = ~725KBps
-```
-
-Traffic (read post):
-
-```
-traffic (without seasonality) = ~1157.5RPS * 4672B = 5 407 840 B = ~5,4MBps
-traffic (with seasonality)    = ~5,4MBps * 10 = ~54MBps
+traffic = ~5787RPS * 272B = 1 574 064B = ~1.6MBps
 ```
 
 #### Reactions
@@ -139,8 +163,7 @@ traffic (with seasonality)    = ~5,4MBps * 10 = ~54MBps
 RPS (write like/dislike):
 
 ```
-RPS (without seasonality) = 10 000 000 * 8 / 86 400 = ~926
-RPS (with seasonality)    = ~926 * 10 = ~9260
+RPS = 10 000 000 * 8 / 86 400 = ~926
 ```
 
 RPS (read like/dislike):
@@ -148,8 +171,7 @@ RPS (read like/dislike):
 ```
 get count of likes and dislikes 2 times for each post
 
-RPS (without seasonality) = 10 000 000 * 2 * 10 / 86 400 = ~2315
-RPS (with seasonality)    = ~2315 * 10 = ~23150
+RPS = 10 000 000 * 2 * 10 / 86 400 = ~2315
 ```
 
 Likes/dislikes model:
@@ -169,15 +191,13 @@ total       33B
 Traffic (write like/dislike):
 
 ```
-traffic (without seasonality) = 926RPS * 33B = 30 558B = ~30.5KBps
-traffic (with seasonality)    = ~30.5KBps * 10 = ~305KBps
+traffic = 926RPS * 33B = 30 558B = ~30.6KBps
 ```
 
 Traffic (read like/dislike):
 
 ```
-traffic (without seasonality) = 2315RPS * 33B = 76 395B = ~76,5KBps
-traffic (with seasonality)    = ~76,5KBps * 10 = ~765KBps
+traffic = 2315RPS * 33B = 76 395B = ~76,5KBps
 ```
 
 ##### Comments
@@ -185,8 +205,7 @@ traffic (with seasonality)    = ~76,5KBps * 10 = ~765KBps
 RPS (write comment):
 
 ```
-RPS (without seasonality) = 10 000 000 * 2 / 86 400 = ~231.5
-RPS (with seasonality)    = ~231.5 * 10 = ~2315
+RPS = 10 000 000 * 2 / 86 400 = ~231.5
 ```
 
 RPS (read comment):
@@ -194,8 +213,7 @@ RPS (read comment):
 ```
 one batch = 5 comments
 
-RPS (without seasonality) = 10 000 000 * 5 * 10 / 86 400 = ~5787
-RPS (with seasonality)    = ~5787 * 10 = ~57870
+RPS = 10 000 000 * 5 * 10 / 86 400 = ~5787
 ```
 
 Comment model:
@@ -215,15 +233,13 @@ total       1032B (max)
 Traffic (write comment):
 
 ```
-traffic (without seasonality) = 231.5RPS * 1032B = 238 908B = ~239KBps
-traffic (with seasonality)    = ~239KBps * 10 = 238 908B = ~2.4MBps
+traffic = 231.5RPS * 1032B = 238 908B = ~239KBps
 ```
 
 Traffic (read comment):
 
 ```
-traffic (without seasonality) = 5787RPS * 1032B = 5 972 184B = ~6MBps
-traffic (with seasonality)    = ~6MBps * 10 = ~60MBps
+traffic = 5787RPS * 1032B = 5 972 184B = ~6MBps
 ```
 
 #### Locations
@@ -233,8 +249,7 @@ RPS (read top-10 locations):
 ```
 one batch = 10 locations
 
-RPS (without seasonality) = 10 000 000 * 1 * 10 / 86 400 = ~1157
-RPS (with seasonality)    = ~1157 * 10 = ~11570
+RPS = 10 000 000 * 1 * 10 / 86 400 = ~1157
 ```
 
 Traffic (read top-10 locations)
@@ -242,8 +257,7 @@ Traffic (read top-10 locations)
 ```
 don't forget about likes
 
-traffic (without seasonality) = 1157RPS * (280B + 33B) = 362 141B = ~362KBps
-traffic (with seasonality)    = ~362KBps * 10 = ~3,6MBps
+traffic = 1157RPS * (280B + 33B) = 362 141B = ~362KBps
 ```
 
 RPS (read posts by locations):
@@ -251,13 +265,11 @@ RPS (read posts by locations):
 ```
 one batch = 10 posts
 
-RPS (without seasonality) = 10 000 000 * 2 * 10 / 86 400 = ~2315
-RPS (with seasonality)    = ~2315 * 10 = ~23150
+RPS = 10 000 000 * 2 * 10 / 86 400 = ~2315
 ```
 
 Traffic (read posts by locations):
 
 ```
-traffic (without seasonality) = 2315RPS * 4672B = 10 815 680B = ~10,8MBps
-traffic (with seasonality)    = ~10,8MBps * 10 = ~108MBps
+traffic = 2315RPS * 4672B = 10 815 680B = ~10,8MBps
 ```
