@@ -1,0 +1,899 @@
+openapi: 3.0.0
+
+tags:
+  - name: "User"
+  - name: "Post"
+  - name: "Attachment"
+  - name: "Reaction"
+  - name: "Comment"
+  - name: "Location"
+
+info:
+  title: "Social Network for Travelers"
+  description: |
+    This document describes the functionality of the social network API.
+    ## General Info
+    - **Base path** - /api/v1/*
+    - **Page size** - 10
+    - There is no implementation of authentication and authorization.
+  version: 1.0.0
+
+paths:
+  /users/{id}:
+    get:
+      summary: "Get user's profile"
+      tags:
+        - "User"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "User ID"
+          schema:
+            type: integer
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    format: int64
+                  username:
+                    type: string
+                  followers_count:
+                    type: integer
+                    format: int64
+                  following_count:
+                    type: integer
+                    format: int64
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /users/{id}/follow:
+    get:
+      summary: "Follow user"
+      tags:
+        - "User"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "User ID"
+          schema:
+            type: integer
+      responses:
+        200:
+          description: "OK"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /users/{id}/unfollow:
+    get:
+      summary: "Follow user"
+      tags:
+        - "User"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "User ID"
+          schema:
+            type: integer
+      responses:
+        200:
+          description: "OK"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /users/{id}/followers:
+    get:
+      summary: "Get user's followers"
+      tags:
+        - "User"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "User ID"
+          schema:
+            type: integer
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                    description: "Total number of followers"
+                  users:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          format: int64
+                        username:
+                          type: string
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /users/{id}/following:
+    get:
+      summary: "Get users followed by a user"
+      tags:
+        - "User"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "User ID"
+          schema:
+            type: integer
+        - name: page
+          in: query
+          required: false
+          description: "Page number"
+          schema:
+            type: integer
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                    description: "Total number of users followed by a user"
+                  users:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          format: int64
+                        username:
+                          type: string
+
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /feed:
+    get:
+      summary: "Get user feed"
+      tags:
+        - "Post"
+      parameters:
+        - name: page
+          in: query
+          required: false
+          description: "Page number"
+          schema:
+            type: integer
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                    description: "Total number of posts"
+                  posts:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/PostResponse"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /users/{id}/posts:
+    get:
+      summary: "Get user's posts"
+      tags:
+        - "User"
+        - "Post"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "User ID"
+          schema:
+            type: integer
+        - name: page
+          in: query
+          required: false
+          description: "Page number"
+          schema:
+            type: integer
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                    description: "Total number of posts"
+                  posts:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/PostResponse"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /posts:
+    post:
+      summary: "Create post"
+      tags:
+        - "Post"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                  maxLength: 3000
+                  description: "Text content with max length of 3KB"
+                location_id:
+                  type: integer
+                  format: int64
+      responses:
+        201:
+          description: "Created"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostResponse"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /posts/{id}:
+    put:
+      summary: "Modify post"
+      tags:
+        - "Post"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "Post ID"
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                  maxLength: 3000
+                  description: "Text content with max length of 3KB"
+                location_id:
+                  type: integer
+                  format: int64
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostResponse"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+    delete:
+      summary: "Delete post"
+      tags:
+        - "Post"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "Post ID"
+          schema:
+            type: integer
+      responses:
+        200:
+          description: "OK"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /posts/{id}/attachments:
+    post:
+      summary: "Upload multiple attachments"
+      tags:
+        - "Attachment"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "Post ID"
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: "Files with a max size of 1MB"
+              required:
+                - files
+      responses:
+        201:
+          description: "Created"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AttachmentResponse"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+    get:
+      summary: "Get attachment"
+      tags:
+        - "Attachment"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "Post ID"
+          schema:
+            type: integer
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AttachmentResponse"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /attachments/{id}:
+    delete:
+      summary: "Delete attachment"
+      tags:
+        - "Attachment"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "Attachment ID"
+          schema:
+            type: integer
+      responses:
+        200:
+          description: "OK"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /posts/{id}/reactions:
+    post:
+      summary: "Add like or dislike"
+      tags:
+        - "Reaction"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "Post ID"
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                  format: int64
+                is_like:
+                  type: boolean
+                  description: "True for like, false for dislike"
+              required:
+                - user_id
+                - is_like
+      responses:
+        201:
+          description: "Created"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReactionResponse"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+    get:
+      summary: "Get like count for a post"
+      tags:
+        - "Reaction"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "Post ID"
+          schema:
+            type: integer
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReactionResponse"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+    delete:
+      summary: "Remove like or dislike"
+      tags:
+        - "Reaction"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "Post ID"
+          schema:
+            type: integer
+        - name: user_id
+          in: query
+          required: true
+          description: "User ID"
+          schema:
+            type: integer
+      responses:
+        200:
+          description: "OK"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /posts/{id}/comments:
+    post:
+      summary: "Add comment to a post"
+      tags:
+        - "Comment"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "Post ID"
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                  format: int64
+                content:
+                  type: string
+                  maxLength: 1000
+                  description: "Comment text with a maximum of 1000 characters"
+              required:
+                - user_id
+                - content
+      responses:
+        201:
+          description: "Created"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommentResponse"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+    get:
+      summary: "Get comments for a post with pagination"
+      tags:
+        - "Comment"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "Post ID"
+          schema:
+            type: integer
+        - name: page
+          in: query
+          required: false
+          description: "Page number"
+          schema:
+            type: integer
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                    description: "Total number of comments"
+                  comments:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/CommentResponse"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /comments/{id}:
+    put:
+      summary: "Update comment content"
+      tags:
+        - "Comment"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "Comment ID"
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                  maxLength: 1000
+                  description: "Updated comment text"
+              required:
+                - content
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommentResponse"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+    delete:
+      summary: "Delete comment"
+      tags:
+        - "Comment"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "Comment ID"
+          schema:
+            type: integer
+      responses:
+        200:
+          description: "OK"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /locations/top-10:
+    get:
+      summary: "Get Top-10 locations"
+      tags:
+        - "Location"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LocationListResponse"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /locations/search:
+    get:
+      summary: "Search location by name"
+      tags:
+        - "Location"
+      parameters:
+        - name: query
+          in: query
+          required: true
+          description: "Name or keyword to search"
+          schema:
+            type: string
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LocationListResponse"
+        400:
+          $ref: "#/components/responses/BadRequest"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+components:
+  responses:
+    BadRequest:
+      description: "Bad Request"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            response:
+              value:
+                error:
+                  code: 400
+                  message: "Bad Request"
+
+    Forbidden:
+      description: "Forbidden"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            response:
+              value:
+                error:
+                  code: 403
+                  message: "Forbidden"
+
+    NotFound:
+      description: "Not Found"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            response:
+              value:
+                error:
+                  code: 404
+                  message: "Not Found"
+
+    InternalServerError:
+      description: "Internal Server Error"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            response:
+              value:
+                error:
+                  code: 500
+                  message: "Internal Server Error"
+
+  schemas:
+    PostResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        created_at:
+          type: integer
+          format: int64
+          description: "Unix timestamp"
+        author_id:
+          type: integer
+          format: int64
+        text:
+          type: string
+          maxLength: 3000
+          description: "Text content with max length of 3KB"
+        location_id:
+          type: integer
+          format: int64
+      required:
+        - id
+        - created_at
+        - author_id
+        - text
+        - location_id
+
+    AttachmentResponse:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: integer
+            format: int64
+          post_id:
+            type: integer
+            format: int64
+          url:
+            type: string
+        required:
+          - id
+          - post_id
+          - url
+
+    ReactionResponse:
+      type: object
+      properties:
+        like_count:
+          type: integer
+          description: "Number of likes on the post"
+        dislike_count:
+          type: integer
+          description: "Number of dislikes on the post"
+      required:
+        - like_count
+        - dislike_count
+
+    CommentResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        created_at:
+          type: integer
+          format: int64
+          description: "Unix timestamp"
+        post_id:
+          type: integer
+          format: int64
+        user_id:
+          type: integer
+          format: int64
+        content:
+          type: string
+          maxLength: 1000
+      required:
+        - id
+        - created_at
+        - post_id
+        - user_id
+        - content
+
+    LocationListResponse:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: integer
+            format: int64
+          place_name:
+            type: string
+            description: "Location name"
+          latitude:
+            type: integer
+            format: int64
+          longitude:
+            type: integer
+            format: int64
+        required:
+          - id
+          - place_name
+          - latitude
+          - longitude
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: integer
+            message:
+              type: string
+          required:
+            - code
+            - message
+      required:
+        - error
