@@ -56,6 +56,7 @@ Notes:
 
 - Disks:
     - Будем считать диски на год вперед;
+    - Не берем HDD, если дисков слишком много, сложней будет поддерживать;
 
 #### Posts
 
@@ -157,6 +158,8 @@ count = max(1, 1, 2) = 2
 conclusion: need 2 SSDs with a capacity of 1TB
 ```
 
+Solution: 2 SSDs with a capacity of 1TB.
+
 #### Media
 
 RPS (write media)
@@ -241,6 +244,8 @@ iops       = ~6365.7RPS / 10 000 = 1 disk
 conclusion: need 1 SDD(nVME) with a capacity of 6TB
 ```
 
+Solution: 7 SDDs (SATA) with a capacity of 1TB.
+
 #### Reactions
 
 ##### Likes/Dislikes
@@ -319,6 +324,8 @@ capacity = ~965GB / 4 = 241.5GB => 250GB
 conclusion: need 4 SSDs with a capacity of 250GB
 ```
 
+Solution: need 4 SSDs with a capacity of 250GB.
+
 ##### Comments
 
 RPS (write comment):
@@ -394,6 +401,8 @@ capacity = ~7.5TB / 7 = ~1.07TB => 1TB (возьмем чуть меньше cap
 
 conclusion: need 8 SSDs with a capacity of 1TB
 ```
+
+Solution: need 8 SSDs with a capacity of 1TB.
 
 #### Locations
 

@@ -6,7 +6,6 @@ Table users {
 }
 
 Table follows {
-  id int64
   created_at timestamp
   follower_id int64
   following_id int64
@@ -42,11 +41,13 @@ Table locations {
 
 Table comments {
   id int64 [primary key]
+  reply_comment_id int64
   created_at timestamp
   post_id int64
   user_id int64
   text text [note: 'max 1000']
 }
+Ref: comments.reply_comment_id > comments.id
 Ref: comments.post_id > posts.id
 Ref: comments.user_id > users.id
 
@@ -55,7 +56,7 @@ Table reactions {
   created_at timestamp
   post_id int64
   user_id int64
-  is_like bool
+  type enum('like', 'dislike')
 }
 Ref: reactions.post_id > posts.id
 Ref: reactions.user_id > users.id
