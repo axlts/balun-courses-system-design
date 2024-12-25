@@ -613,35 +613,24 @@ paths:
         500:
           $ref: "#/components/responses/InternalServerError"
 
-  /locations/top:
-    get:
-      summary: "Get Top-10 locations"
-      tags:
-        - "Location"
-      responses:
-        200:
-          description: "OK"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LocationListResponse"
-        400:
-          $ref: "#/components/responses/BadRequest"
-        500:
-          $ref: "#/components/responses/InternalServerError"
-
   /locations:
     get:
-      summary: "Search location by name"
+      summary: "Fetch locations"
       tags:
         - "Location"
       parameters:
         - name: query
           in: query
-          required: true
+          required: false
           description: "Name or keyword to search"
           schema:
             type: string
+        - name: top
+          in: query
+          required: false
+          description: "Fetch the top N locations"
+          schema:
+            type: integer
       responses:
         200:
           description: "OK"
