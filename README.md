@@ -52,7 +52,13 @@
 
 ### System Load Calculations
 
-#### Post
+Notes:
+
+- Disks:
+    - Будем считать диски на год вперед;
+    - Не берем HDD, если дисков слишком много, сложней будет поддерживать;
+
+#### Posts
 
 RPS (write post):
 
@@ -74,15 +80,17 @@ RPS = 10 000 000 * 10 / 86 400 = ~1157.5
 Post model:
 
 ```
-name         size
------        -----
-id           8B
-created_at   8B
-author_id    8B
-text         text (max 3KB)
-location_id  8B
------        -----
-total        3032B (max)
+name           size
+-----          -----
+id             8B
+created_at     8B
+author_id      8B
+text           text (max 3000)
+location_id    8B
+like_count     4B
+dislike_count  4B
+-----          -----
+total          3040B (max)
 ```
 
 Location model:
@@ -101,20 +109,56 @@ total       280B
 One post size (without media files):
 
 ```
-3032B + 280B = 3312B
+3040B + 280B = 3320B
 ```
 
 Traffic (write post):
 
 ```
-traffic = ~15.5RPS * 3312B = 51 336B = ~51.3KBps
+traffic = ~15.5RPS * 3320B = 51 460B = ~51.5KBps
 ```
 
 Traffic (read post):
 
 ```
-traffic = ~1157.5RPS * 3312B = 3 833 640B = ~3,8MBps
+traffic = ~1157.5RPS * 3320B = 3 842 900B = ~3,8MBps
 ```
+
+Disks:
+
+```
+required capacity   = ~51.5KBps * 86 400 * 365 = 1 624 104 000KB = ~1.6TB
+required throughput = ~51.5KBps + ~3.8MBps = ~3.9MBps
+required iops       = ~15.5RPS + ~1157.5RPS = 1173RPS
+```
+
+HDD:
+
+```
+capacity   = ~1.6TB / (1 * 2TB) = 1 disk
+throughput = ~3.9MBps / 100MBps = 1 disk
+iops       = 1173RPS / 100 = 12 disks
+
+count    = max(1, 1, 12) = 12
+сapacity = ~1.6TB / 12 = ~133GB => 160GB
+
+conclusion: need 12 HDDs with a capacity of 160GB
+```
+
+SSD(SATA):
+
+```
+capacity = ~1.6TB / (1 * 2TB) = 1 disk
+throughput = ~3.9MBps / 500MBps = 1 disk
+iops = 1173RPS / 1000 = 2 disks
+
+count = max(1, 1, 2) = 2
+сapacity = ~1.6TB / 2 = ~800GB => 1TB
+
+conclusion: need 2 SSDs with a capacity of 1TB
+```
+
+Solution: 2 SSDs with a capacity of 1TB.
 
 #### Media
 
@@ -155,6 +199,52 @@ Traffic (read media):
 ```
 traffic = ~5787RPS * 272B = 1 574 064B = ~1.6MBps
 ```
+
+Disks:
+
+```
+required capacity   = ~157.4KBps * 86 400 * 365 = 4 963 766 400KB = ~5TB
+required throughput = ~157.4KBps + ~1.6MBps = ~1.8MBps
+required iops       = ~578.7RPS + ~5787RPS = ~6365.7RPS
+```
+
+HDD:
+
+```
+capacity   = ~5TB / (1 * 6TB) = 1 disk
+throughput = ~1.8MBps / 100MBps = 1 disk
+iops       = ~6365.7RPS / 100 = 64 disks
+
+count    = max(1, 1, 64) = 64
+capacity = ~5TB / 64 = ~78GB => 160GB
+
+conclusion: need 64 HDDs with a capacity of 160GB
+```
+
+SSD(SATA):
+
+```
+capacity   = ~5TB / (1 * 6TB) = 1 disk
+throughput = ~1.8MBps / 500MBps = 1 disk
+iops       = ~6365.7RPS / 1000 = 7 disks
+
+count    = max(1, 1, 7) = 7
+capacity = ~5TB / 7 = ~714GB => 1TB
+
+conclusion: need 7 SDDs (SATA) with a capacity of 1TB
+```
+
+SDD(nVME):
+
+```
+capacity   = ~5TB / (1 * 6TB) = 1 disk
+throughput = ~1.8MBps / 3GBps = 1 disk
+iops       = ~6365.7RPS / 10 000 = 1 disk
+
+conclusion: need 1 SDD(nVME) with a capacity of 6TB
+```
+
+Solution: 7 SDDs (SATA) with a capacity of 1TB.
 
 #### Reactions
 
@@ -200,6 +290,42 @@ Traffic (read like/dislike):
 traffic = 2315RPS * 33B = 76 395B = ~76,5KBps
 ```
 
+Disks:
+
+```
+required capacity   = ~30.6KBps * 86 400 * 365 = 965 001 600KB = ~965GB
+required throughput = ~30.6KBps + ~76,5KBps = ~107.1KBps
+required iops       = ~926RPS + ~2315RPS = 3241RPS
+```
+
+HDD:
+
+```
+capacity   = ~965GB / (1 * 1TB) = 1 disk
+throughput = ~107.1KBps / 100MBps = 1 disk
+iops       = 3241RPS / 100 = 33 disks
+
+count    = max(1, 1, 33) = 33
+capacity = ~965GB / 33 = 30GB => 160GB
+
+conclusion: need 33 HDDs with a capacity of 160GB
+```
+
+SDD:
+
+```
+capacity   = ~965GB / (1 * 1TB) = 1 disk
+throughput = ~107.1KBps / 500MBps = 1 disk
+iops       = 3241RPS / 1000 = 4 disks
+
+count    = max(1, 1, 4) = 4
+capacity = ~965GB / 4 = 241.5GB => 250GB
+
+conclusion: need 4 SSDs with a capacity of 250GB
+```
+
+Solution: need 4 SSDs with a capacity of 250GB.
+
 ##### Comments
 
 RPS (write comment):
@@ -225,7 +351,7 @@ id          8B
 created_at  8B
 post_id     8B
 user_id     8B
-text        text (max 1KB)
+text        text (max 1000)
 -----       -----
 total       1032B (max)
 ```
@@ -241,6 +367,42 @@ Traffic (read comment):
 ```
 traffic = 5787RPS * 1032B = 5 972 184B = ~6MBps
 ```
+
+Disks:
+
+```
+required capacity   = ~239KBps * 86 400 * 365 = 7 537 104 000KB = ~7.5TB
+required throughput = ~239KBps + ~6MBps = ~6.3MPps
+required iops       = ~231.5RPS + ~5787RPS = ~6018.5RPS
+```
+
+HDD:
+
+```
+capacity   = ~7.5TB / (2 * 4TB) = 2 disk
+throughput = ~6.3MPps / 100MBps = 1 disk
+iops       = ~6018.5RPS / 100 = 61 disks
+
+count    = max(2, 1, 61) = 61
+capacity = ~7.5TB / 61 = ~123GB => 160GB
+
+conclusion: need 61 HDDs with a capacity of 160GB
+```
+
+SSD:
+
+```
+capacity   = ~7.5TB / (2 * 4TB) = 2 disk
+throughput = ~6.3MPps / 500MBps = 1 disk
+iops       = ~6018.5RPS / 1000 = 7 disks
+
+count    = max(2, 1, 7) = 7
+capacity = ~7.5TB / 7 = ~1.07TB => 1TB (возьмем чуть меньше capacity, увеличим count) count = 7 => 8
+
+conclusion: need 8 SSDs with a capacity of 1TB
+```
+
+Solution: need 8 SSDs with a capacity of 1TB.
 
 #### Locations
 
